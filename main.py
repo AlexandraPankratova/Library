@@ -81,11 +81,15 @@ def main():
             image_ext = parse_file_ext(book_image_url)
 
             comments = soup.find_all(class_="texts")
-
             print(book_title)
-
             for comment in comments:
                 print(comment.find(class_="black").text)
+
+            book_soup = soup.find_all(class_="d_book")
+            for string in book_soup:
+                if string.find("b"):
+                    book_genre = string.find("a").text
+                    print(book_genre)
 
             download_image(
                 book_image_response,
