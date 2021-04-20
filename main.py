@@ -34,6 +34,46 @@ def download_txt(book_response, book_title, directory):
         file.write(book_response.content)
 
 
+def parse_book_page(book_id, book_response):
+
+    soup = BeautifulSoup(
+        book_response.text,
+        "lxml",
+    )
+
+    title_tag = soup.find("h1")
+    title_text = title_tag.text
+
+    book_title = title_text.split("::")[0].strip()
+    book_author = title_text.split("::")[1].strip()
+
+    book_image_url = urljoin(
+        "http://tululu.org",
+        soup.find(class_="bookimage").find("img")["src"],
+    )
+    book_image_response = requests.get(book_image_url, verify=False)
+    book_image_response.raise_for_status()
+
+    list_of_comments = []
+    comments = soup.find_all(class_="texts")
+    for comment in comments:
+        list_of_comments.append(comment.find(class_="black").text)
+
+    book_soup = soup.find_all(class_="d_book")
+    for string in book_soup:
+        if string.find("b"):
+            book_genre = string.find("a").text
+
+    book_info = {
+        "title": book_title,
+        "author": book_author,
+        "comments": list_of_comments,
+        "image_url": book_image_url,
+        "genre": book_genre,
+    }
+    return book_info
+
+
 def main():
 
     load_dotenv()
@@ -46,7 +86,10 @@ def main():
     for book_id in range(1, 11):
 
         download_book_url = f"https://tululu.org/txt.php?id={book_id}"
-        soup_url = f"https://tululu.org/b{book_id}/"
+        soup_response = requests.get(
+            f"https://tululu.org/b{book_id}/",
+            verify=False,
+        )
 
         book_response = requests.get(
             download_book_url,
@@ -57,39 +100,15 @@ def main():
         try:
             check_for_redirect(book_response)
 
-            soup = BeautifulSoup(
-                requests.get(
-                    soup_url,
-                    verify=False,
-                ).text,
-                "lxml",
+            book_information = parse_book_page(book_id, soup_response)
+            book_name = f"{book_id}. " + book_information["title"]
+
+            book_image_response = requests.get(
+                book_information["image_url"],
+                verify=False,
             )
-
-            title_tag = soup.find("h1")
-            title_text = title_tag.text
-
-            book_title = title_text.split("::")[0].strip()
-            book_name = f"{book_id}. " + book_title
-
-            book_image_url = urljoin(
-                "http://tululu.org",
-                soup.find(class_="bookimage").find("img")["src"],
-            )
-            book_image_response = requests.get(book_image_url, verify=False)
             book_image_response.raise_for_status()
-
-            image_ext = parse_file_ext(book_image_url)
-
-            comments = soup.find_all(class_="texts")
-            print(book_title)
-            for comment in comments:
-                print(comment.find(class_="black").text)
-
-            book_soup = soup.find_all(class_="d_book")
-            for string in book_soup:
-                if string.find("b"):
-                    book_genre = string.find("a").text
-                    print(book_genre)
+            image_ext = parse_file_ext(book_information["image_url"])
 
             download_image(
                 book_image_response,
@@ -101,6 +120,7 @@ def main():
                 f"{book_name}.txt",
                 books_directory,
             )
+            print(book_information)
         except requests.HTTPError:
             pass
 
