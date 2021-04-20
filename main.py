@@ -1,3 +1,4 @@
+import argparse
 import os
 from urllib.parse import unquote, urljoin, urlsplit
 
@@ -75,15 +76,28 @@ def parse_book_page(book_id, book_response):
 
 
 def main():
-
     load_dotenv()
     images_directory = os.getenv("DIRECTORY_FOR_IMAGES")
     books_directory = os.getenv("DIRECTORY_FOR_BOOKS")
 
+    parser = argparse.ArgumentParser(
+        description="Программа скачивает книги с сайта tululu.py")
+    parser.add_argument(
+        "start_id",
+        help="ID книги, с которой начинается скачивание.",
+        type=int,
+    )
+    parser.add_argument(
+        "end_id",
+        help="ID книги, которым заканчивается скачивание.",
+        type=int,
+    )
+    ids = parser.parse_args()
+
     ensure_dir(images_directory)
     ensure_dir(books_directory)
 
-    for book_id in range(1, 11):
+    for book_id in range(ids.start_id, ids.end_id):
 
         download_book_url = f"https://tululu.org/txt.php?id={book_id}"
         soup_response = requests.get(
@@ -112,7 +126,7 @@ def main():
 
             download_image(
                 book_image_response,
-                f"{images_directory}{book_name}.{image_ext}",
+                f"{images_directory}{book_name}{image_ext}",
             )
 
             download_txt(
@@ -120,7 +134,6 @@ def main():
                 f"{book_name}.txt",
                 books_directory,
             )
-            print(book_information)
         except requests.HTTPError:
             pass
 
