@@ -1,5 +1,7 @@
-import requests
 import os
+
+import requests
+
 
 def ensure_dir(dir_name):
     os.makedirs(dir_name, exist_ok=True)
@@ -28,7 +30,11 @@ def main():
         "./images/dvmn.svg",
     )
 
-    download_book("https://tululu.org/txt.php?id=32168", "./books/Пески Марса.txt")
+    for book_id in range(32159, 32169):
+        download_book(
+            f"https://tululu.org/txt.php?id={book_id}",
+            f"./books/book_{book_id}.txt",
+        )
 
 
 if __name__ == '__main__':
