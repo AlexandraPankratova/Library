@@ -1,13 +1,20 @@
 import os
+from urllib.parse import unquote, urljoin, urlsplit
 
 import requests
 from bs4 import BeautifulSoup
-from pathvalidate import sanitize_filename
 from dotenv import load_dotenv
+from pathvalidate import sanitize_filename
 
 
 def ensure_dir(dir_name):
     os.makedirs(dir_name, exist_ok=True)
+
+
+def parse_file_ext(url):
+    unquoted_url = unquote(url)
+    parsed_url = urlsplit(unquoted_url)
+    return os.path.splitext(parsed_url.path)[1]
 
 
 def download_image(image_response, image_name):
@@ -28,20 +35,13 @@ def download_txt(book_response, book_title, directory):
 
 
 def main():
+
     load_dotenv()
     images_directory = os.getenv("DIRECTORY_FOR_IMAGES")
     books_directory = os.getenv("DIRECTORY_FOR_BOOKS")
+
     ensure_dir(images_directory)
     ensure_dir(books_directory)
-
-    image_url = "https://dvmn.org/filer/canonical/1542890876/16/"
-    image_response = requests.get(image_url)
-    image_response.raise_for_status()
-
-    download_image(
-        image_response,
-        f"{images_directory}dvmn.svg",
-    )
 
     for book_id in range(1, 11):
         book_response = requests.get(
@@ -50,20 +50,36 @@ def main():
         )
         book_response.raise_for_status()
 
-        soup = BeautifulSoup(
-            requests.get(
-                f"https://tululu.org/b{book_id}/",
-                verify=False,
-            ).text,
-            'lxml',
-        )
-
-        title_tag = soup.find('h1')
-        title_text = title_tag.text
-        book_title = f"{book_id}. "+title_text.split("::")[0].strip()
-
         try:
             check_for_redirect(book_response)
+
+            soup = BeautifulSoup(
+                requests.get(
+                    f"https://tululu.org/b{book_id}/",
+                    verify=False,
+                ).text,
+                "lxml",
+            )
+
+            title_tag = soup.find("h1")
+            title_text = title_tag.text
+
+            book_title = f"{book_id}. " + title_text.split("::")[0].strip()
+
+            book_image_url = urljoin(
+                "http://tululu.org",
+                soup.find(class_="bookimage").find("img")["src"],
+            )
+            book_image_response = requests.get(book_image_url, verify=False)
+            book_image_response.raise_for_status()
+
+            image_ext = parse_file_ext(book_image_url)
+
+            download_image(
+                book_image_response,
+                f"{images_directory}{book_title}.{image_ext}",
+            )
+
             download_txt(
                 book_response,
                 f"{book_title}.txt",
