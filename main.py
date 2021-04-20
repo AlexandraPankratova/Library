@@ -44,8 +44,12 @@ def main():
     ensure_dir(books_directory)
 
     for book_id in range(1, 11):
+
+        download_book_url = f"https://tululu.org/txt.php?id={book_id}"
+        soup_url = f"https://tululu.org/b{book_id}/"
+
         book_response = requests.get(
-            f"https://tululu.org/txt.php?id={book_id}",
+            download_book_url,
             verify=False,
         )
         book_response.raise_for_status()
@@ -55,7 +59,7 @@ def main():
 
             soup = BeautifulSoup(
                 requests.get(
-                    f"https://tululu.org/b{book_id}/",
+                    soup_url,
                     verify=False,
                 ).text,
                 "lxml",
@@ -64,7 +68,8 @@ def main():
             title_tag = soup.find("h1")
             title_text = title_tag.text
 
-            book_title = f"{book_id}. " + title_text.split("::")[0].strip()
+            book_title = title_text.split("::")[0].strip()
+            book_name = f"{book_id}. " + book_title
 
             book_image_url = urljoin(
                 "http://tululu.org",
@@ -75,14 +80,21 @@ def main():
 
             image_ext = parse_file_ext(book_image_url)
 
+            comments = soup.find_all(class_="texts")
+
+            print(book_title)
+
+            for comment in comments:
+                print(comment.find(class_="black").text)
+
             download_image(
                 book_image_response,
-                f"{images_directory}{book_title}.{image_ext}",
+                f"{images_directory}{book_name}.{image_ext}",
             )
 
             download_txt(
                 book_response,
-                f"{book_title}.txt",
+                f"{book_name}.txt",
                 books_directory,
             )
         except requests.HTTPError:
