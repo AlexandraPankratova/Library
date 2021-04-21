@@ -31,8 +31,8 @@ def check_for_redirect(response):
 def download_txt(book_response, book_title, directory):
     sanitized_book_title = sanitize_filename(book_title)
     book_path = os.path.join(directory, sanitized_book_title)
-    with open(book_path, "wb") as file:
-        file.write(book_response.content)
+    with open(book_path, "w") as file:
+        file.write(book_response.text)
 
 
 def parse_book_page(book_id, book_response):
