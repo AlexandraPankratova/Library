@@ -67,6 +67,14 @@ def parse_book_page(book_response):
     return book_info
 
 
+def parse_arguments(parser, arg_name, arg_help, arg_type):
+    parser.add_argument(
+        arg_name,
+        help=arg_help,
+        type=arg_type,
+    )
+
+
 def main():
     load_dotenv()
     images_directory = os.getenv("DIRECTORY_FOR_IMAGES")
@@ -74,15 +82,17 @@ def main():
 
     parser = argparse.ArgumentParser(
         description="Программа скачивает книги с сайта tululu.py")
-    parser.add_argument(
+    parse_arguments(
+        parser,
         "start_id",
-        help="ID книги, с которой начинается скачивание.",
-        type=int,
+        "ID книги, с которой начинается скачивание.",
+        int,
     )
-    parser.add_argument(
+    parse_arguments(
+        parser,
         "end_id",
-        help="ID книги, которым заканчивается скачивание.",
-        type=int,
+        "ID книги, которым заканчивается скачивание.",
+        int,
     )
     books_ids = parser.parse_args()
 
