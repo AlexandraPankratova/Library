@@ -45,8 +45,9 @@ def parse_book_page(book_id, book_response):
     title_tag = soup.find("h1")
     title_text = title_tag.text
 
-    book_title = title_text.split("::")[0].strip()
-    book_author = title_text.split("::")[1].strip()
+    book_title, book_author = title_text.split("::")
+    book_title = book_title.strip()
+    book_author = book_author.strip()
 
     book_image_url = urljoin(
         "http://tululu.org",
