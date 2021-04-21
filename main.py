@@ -135,6 +135,7 @@ def main():
                 books_directory,
             )
         except requests.HTTPError:
+            print(f"Book {book_id} does not have txt format.")
             pass
 
 
