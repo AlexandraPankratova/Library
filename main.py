@@ -35,7 +35,7 @@ def download_txt(book_response, book_title, directory):
         file.write(book_response.text)
 
 
-def parse_book_page(book_id, book_response):
+def parse_book_page(book_response):
 
     soup = BeautifulSoup(
         book_response.text,
@@ -53,7 +53,8 @@ def parse_book_page(book_id, book_response):
     )
 
     comments = soup.find_all(class_="texts")
-    list_of_comments = [comment.find(class_="black").text for comment in comments]
+    list_of_comments = [comment.find(class_="black").text
+                        for comment in comments]
 
     book_soup = soup.find_all(class_="d_book")
     for string in book_soup:
@@ -87,29 +88,29 @@ def main():
         help="ID книги, которым заканчивается скачивание.",
         type=int,
     )
-    ids = parser.parse_args()
+    books_ids = parser.parse_args()
 
     ensure_dir(images_directory)
     ensure_dir(books_directory)
 
-    for book_id in range(ids.start_id, ids.end_id):
+    for book_id in range(books_ids.start_id, books_ids.end_id):
 
         download_book_url = f"https://tululu.org/txt.php?id={book_id}"
-        soup_response = requests.get(
+        book_info_response = requests.get(
             f"https://tululu.org/b{book_id}/",
             verify=False,
         )
 
-        book_response = requests.get(
+        download_book_response = requests.get(
             download_book_url,
             verify=False,
         )
 
         try:
-            book_response.raise_for_status()
-            check_for_redirect(book_response)
+            download_book_response.raise_for_status()
+            check_for_redirect(download_book_response)
 
-            book_information = parse_book_page(book_id, soup_response)
+            book_information = parse_book_page(book_info_response)
             book_name = f"{book_id}. {book_information['title']}"
 
             book_image_response = requests.get(
@@ -125,7 +126,7 @@ def main():
             )
 
             download_txt(
-                book_response,
+                download_book_response,
                 f"{book_name}.txt",
                 books_directory,
             )
