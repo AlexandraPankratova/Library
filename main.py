@@ -53,10 +53,8 @@ def parse_book_page(book_id, book_response):
         soup.find(class_="bookimage").find("img")["src"],
     )
 
-    list_of_comments = []
     comments = soup.find_all(class_="texts")
-    for comment in comments:
-        list_of_comments.append(comment.find(class_="black").text)
+    list_of_comments = [comment.find(class_="black").text for comment in comments]
 
     book_soup = soup.find_all(class_="d_book")
     for string in book_soup:
