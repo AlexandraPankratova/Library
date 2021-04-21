@@ -112,7 +112,7 @@ def main():
             check_for_redirect(book_response)
 
             book_information = parse_book_page(book_id, soup_response)
-            book_name = f"{book_id}. " + book_information["title"]
+            book_name = f"{book_id}. {book_information['title']}"
 
             book_image_response = requests.get(
                 book_information["image_url"],
