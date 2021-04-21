@@ -8,10 +8,6 @@ from dotenv import load_dotenv
 from pathvalidate import sanitize_filename
 
 
-def ensure_dir(dir_name):
-    os.makedirs(dir_name, exist_ok=True)
-
-
 def parse_file_ext(url):
     unquoted_url = unquote(url)
     parsed_url = urlsplit(unquoted_url)
@@ -90,8 +86,8 @@ def main():
     )
     books_ids = parser.parse_args()
 
-    ensure_dir(images_directory)
-    ensure_dir(books_directory)
+    os.makedirs(images_directory, exist_ok=True)
+    os.makedirs(books_directory, exist_ok=True)
 
     for book_id in range(books_ids.start_id, books_ids.end_id):
 
