@@ -106,9 +106,9 @@ def main():
             download_book_url,
             verify=False,
         )
-        book_response.raise_for_status()
 
         try:
+            book_response.raise_for_status()
             check_for_redirect(book_response)
 
             book_information = parse_book_page(book_id, soup_response)
