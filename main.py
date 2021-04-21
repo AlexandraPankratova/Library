@@ -46,8 +46,6 @@ def parse_book_page(book_id, book_response):
     title_text = title_tag.text
 
     book_title, book_author = title_text.split("::")
-    book_title = book_title.strip()
-    book_author = book_author.strip()
 
     book_image_url = urljoin(
         "http://tululu.org",
@@ -63,8 +61,8 @@ def parse_book_page(book_id, book_response):
             book_genre = string.find("a").text
 
     book_info = {
-        "title": book_title,
-        "author": book_author,
+        "title": book_title.strip(),
+        "author": book_author.strip(),
         "comments": list_of_comments,
         "image_url": book_image_url,
         "genre": book_genre,
