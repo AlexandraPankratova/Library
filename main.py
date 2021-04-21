@@ -52,8 +52,6 @@ def parse_book_page(book_id, book_response):
         "http://tululu.org",
         soup.find(class_="bookimage").find("img")["src"],
     )
-    book_image_response = requests.get(book_image_url, verify=False)
-    book_image_response.raise_for_status()
 
     list_of_comments = []
     comments = soup.find_all(class_="texts")
