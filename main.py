@@ -95,7 +95,9 @@ def main():
 
     for book_id in range(books_ids.start_id, books_ids.end_id):
 
-        download_book_url = f"https://tululu.org/txt.php?id={book_id}"
+        download_book_params = {"id": book_id}
+
+        download_book_url = "https://tululu.org/txt.php"
         book_info_response = requests.get(
             f"https://tululu.org/b{book_id}/",
             verify=False,
@@ -103,6 +105,7 @@ def main():
 
         download_book_response = requests.get(
             download_book_url,
+            params=download_book_params,
             verify=False,
         )
 
